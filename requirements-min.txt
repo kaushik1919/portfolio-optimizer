@@ -1,0 +1,8 @@
+# Portfolio GNN - Minimum Requirements
+# =====================================
+# Minimal dependencies needed for Phase 1 infrastructure.
+# Use this for lightweight installation.
+
+numpy>=1.21.0
+torch>=1.12.0
+pyyaml>=6.0
