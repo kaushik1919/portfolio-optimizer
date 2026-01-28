@@ -9,11 +9,13 @@ This script serves as the canonical way to run experiments. It:
 4. Emits a run header with metadata
 5. Loads and preprocesses market data (Phase 2)
 6. Validates time-series integrity
-7. Exits cleanly
+7. Builds time-indexed graph snapshots (Phase 3)
+8. Validates graph integrity
+9. Exits cleanly
 
-Current implementation: Phase 2 (Data Ingestion)
-- NO graph construction
+Current implementation: Phase 3 (Graph Construction)
 - NO model training
+- NO node features
 - NO portfolio optimization
 
 Usage:
@@ -238,11 +240,58 @@ def main() -> int:
         return 1
     
     # =========================================================================
-    # PHASE 2 COMPLETE - STOP HERE
+    # PHASE 3: GRAPH CONSTRUCTION
     # =========================================================================
     logger.info("")
-    logger.info("Phase 2 complete: Data ingestion and validation successful.")
-    logger.info("STOP: Phase 3 (Graph Construction) not yet implemented.")
+    logger.info("Starting Phase 3: Graph Construction")
+    logger.info("")
+    
+    try:
+        # Import graph construction modules
+        from portfolio_gnn.graph_construction import (
+            build_graph_sequence,
+            validate_graph_sequence,
+            GraphValidationError,
+        )
+        from portfolio_gnn.graph_construction.validation import compute_graph_statistics
+        
+        # Step 1: Build graph sequence
+        logger.info("Step 1: Building time-indexed graph snapshots...")
+        graph_snapshots = build_graph_sequence(processed_data, config)
+        
+        # Step 2: Validate graph integrity
+        logger.info("")
+        logger.info("Step 2: Validating graph integrity...")
+        validate_graph_sequence(graph_snapshots, config)
+        
+        # Compute and log statistics
+        stats = compute_graph_statistics(graph_snapshots)
+        
+        logger.info("")
+        logger.info("=" * 60)
+        logger.info("GRAPH CONSTRUCTION SUMMARY")
+        logger.info("=" * 60)
+        logger.info(f"Graph snapshots:   {stats['num_snapshots']}")
+        logger.info(f"Nodes per graph:   {stats['num_nodes']}")
+        logger.info(f"Edges per graph:   min={stats['min_edges']}, max={stats['max_edges']}, mean={stats['mean_edges']:.1f}")
+        logger.info(f"Date range:        {stats['first_timestamp']} to {stats['last_timestamp']}")
+        logger.info(f"Lookback window:   {stats['lookback_window']}")
+        logger.info(f"Edge types:        {stats['edge_types']}")
+        logger.info("=" * 60)
+        
+    except GraphValidationError as e:
+        logger.error(f"Graph validation failed: {e}")
+        return 1
+    except Exception as e:
+        logger.exception(f"Unexpected error during graph construction: {e}")
+        return 1
+    
+    # =========================================================================
+    # PHASE 3 COMPLETE - STOP HERE
+    # =========================================================================
+    logger.info("")
+    logger.info("Phase 3 complete: Graph construction and validation successful.")
+    logger.info("STOP: Phase 4 (Node Features / GNN Training) not yet implemented.")
     logger.info("Exiting cleanly.")
     
     return 0

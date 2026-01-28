@@ -79,7 +79,7 @@ data:
 # MODEL CONFIGURATION
 # =============================================================================
 # Configuration for the Graph Neural Network architecture.
-# Phase 3+ will implement GNN models based on these settings.
+# Phase 4+ will implement GNN models based on these settings.
 model:
   # GNN architecture type
   architecture:
@@ -92,12 +92,35 @@ model:
   attention:
     num_heads: 4
     dropout: 0.1
+
+# =============================================================================
+# GRAPH CONSTRUCTION CONFIGURATION (Phase 3)
+# =============================================================================
+# Configuration for time-aware financial graph construction.
+# These parameters control how cross-asset relationships are encoded.
+#
+# CRITICAL: All graph computations are causal (no lookahead bias).
+# Edge correlations use ONLY data within [t-lookback_window, t].
+graph:
+  # Lookback window for rolling edge computations (in trading days)
+  # Correlation is computed over this window ending at each timestamp.
+  # Higher values = smoother but slower to adapt
+  # Lower values = more responsive but noisier
+  lookback_window: 60
   
-  # Graph construction parameters
-  graph:
-    edge_type: "placeholder"  # e.g., "correlation", "sector", "hybrid"
-    threshold: 0.5
-    dynamic: true
+  # Minimum absolute correlation to include an edge
+  # Higher threshold = sparser graph, stronger edges
+  # Lower threshold = denser graph, weaker edges included
+  correlation_threshold: 0.5
+  
+  # Whether to create directed edges
+  # false = undirected (both i->j and j->i for each edge)
+  # true = directed (only i->j)
+  directed: false
+  
+  # Minimum edges per node (advisory, for monitoring)
+  # Graphs with nodes having fewer edges may indicate data issues
+  min_edges_per_node: 1
 
 # =============================================================================
 # TRAINING CONFIGURATION
