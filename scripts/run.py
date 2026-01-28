@@ -7,9 +7,14 @@ This script serves as the canonical way to run experiments. It:
 2. Initializes logging based on configuration
 3. Sets the global random seed for reproducibility
 4. Emits a run header with metadata
-5. Exits cleanly
+5. Loads and preprocesses market data (Phase 2)
+6. Validates time-series integrity
+7. Exits cleanly
 
-This is Phase 1 infrastructure only - no ML, data, graph, or optimization logic.
+Current implementation: Phase 2 (Data Ingestion)
+- NO graph construction
+- NO model training
+- NO portfolio optimization
 
 Usage:
     python scripts/run.py experiments/base.yaml
@@ -19,6 +24,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -169,14 +175,74 @@ def main() -> int:
     # Emit experiment header
     log_experiment_header(config, seed, logger)
     
-    # Phase 1: Infrastructure only
-    # Future phases will add:
-    # - Data loading
-    # - Graph construction
-    # - Model training
-    # - Portfolio optimization
+    # =========================================================================
+    # PHASE 2: DATA INGESTION
+    # =========================================================================
+    logger.info("")
+    logger.info("Starting Phase 2: Market Data Ingestion")
+    logger.info("")
     
-    logger.info("Phase 1 scaffold complete. No ML operations in this phase.")
+    try:
+        # Import data ingestion modules
+        from portfolio_gnn.data_ingestion.loader import load_market_data, DataLoadingError
+        from portfolio_gnn.data_ingestion.preprocessing import (
+            preprocess_market_data,
+            PreprocessingError,
+        )
+        from portfolio_gnn.data_ingestion.validation import (
+            validate_timeseries,
+            ValidationError,
+        )
+        
+        # Step 1: Load raw market data
+        logger.info("Step 1: Loading raw market data...")
+        raw_data = load_market_data(config)
+        
+        # Step 2: Preprocess and align time series
+        logger.info("")
+        logger.info("Step 2: Preprocessing and aligning time series...")
+        processed_data = preprocess_market_data(raw_data, config)
+        
+        # Step 3: Validate time-series integrity
+        logger.info("")
+        logger.info("Step 3: Validating time-series integrity...")
+        validate_timeseries(processed_data, config)
+        
+        # Log dataset summary
+        logger.info("")
+        logger.info("=" * 60)
+        logger.info("DATASET SUMMARY")
+        logger.info("=" * 60)
+        logger.info(f"Assets loaded:     {processed_data.num_assets}")
+        logger.info(f"Trading days:      {processed_data.num_trading_days}")
+        logger.info(f"Date range:        {processed_data.start_date} to {processed_data.end_date}")
+        logger.info(f"Dropped assets:    {len(processed_data.dropped_assets)}")
+        if processed_data.dropped_assets:
+            logger.info(f"  Dropped list:    {processed_data.dropped_assets}")
+        logger.info(f"Tickers:           {processed_data.tickers}")
+        if processed_data.macro is not None:
+            logger.info(f"Macro series:      {list(processed_data.macro.columns)}")
+        logger.info("=" * 60)
+        
+    except DataLoadingError as e:
+        logger.error(f"Data loading failed: {e}")
+        return 1
+    except PreprocessingError as e:
+        logger.error(f"Preprocessing failed: {e}")
+        return 1
+    except ValidationError as e:
+        logger.error(f"Validation failed: {e}")
+        return 1
+    except Exception as e:
+        logger.exception(f"Unexpected error during data ingestion: {e}")
+        return 1
+    
+    # =========================================================================
+    # PHASE 2 COMPLETE - STOP HERE
+    # =========================================================================
+    logger.info("")
+    logger.info("Phase 2 complete: Data ingestion and validation successful.")
+    logger.info("STOP: Phase 3 (Graph Construction) not yet implemented.")
     logger.info("Exiting cleanly.")
     
     return 0

@@ -14,28 +14,65 @@
 # =============================================================================
 # DATA CONFIGURATION
 # =============================================================================
-# Configuration for data ingestion, preprocessing, and storage.
-# Phase 2+ will implement data loading based on these settings.
+# Configuration for data ingestion, preprocessing, and validation.
+# All ingestion behavior is config-driven with strict guarantees.
 data:
+  # Date range for data loading (REQUIRED)
+  # Format: YYYY-MM-DD
+  start_date: "2020-01-01"
+  end_date: "2024-12-31"
+  
+  # Asset universe - list of ticker symbols to load from Yahoo Finance
+  # These should be liquid US equities/ETFs with sufficient history
+  asset_universe:
+    - "SPY"   # S&P 500 ETF
+    - "QQQ"   # Nasdaq 100 ETF
+    - "IWM"   # Russell 2000 ETF
+    - "AAPL"  # Apple
+    - "MSFT"  # Microsoft
+    - "GOOGL" # Alphabet
+    - "AMZN"  # Amazon
+    - "META"  # Meta
+    - "NVDA"  # Nvidia
+    - "JPM"   # JPMorgan
+    - "JNJ"   # Johnson & Johnson
+    - "V"     # Visa
+    - "PG"    # Procter & Gamble
+    - "UNH"   # UnitedHealth
+    - "HD"    # Home Depot
+    - "MA"    # Mastercard
+    - "DIS"   # Disney
+    - "PYPL"  # PayPal
+    - "ADBE"  # Adobe
+    - "NFLX"  # Netflix
+  
+  # Macro series - FRED series IDs for macroeconomic factors (optional)
+  # These are used for regime detection and risk factors
+  macro_series:
+    - "DGS10"     # 10-Year Treasury Rate
+    - "DGS2"      # 2-Year Treasury Rate
+    - "T10Y2Y"    # 10Y-2Y Spread (yield curve)
+    - "VIXCLS"    # VIX Volatility Index
+    - "DFF"       # Federal Funds Rate
+  
+  # Data quality parameters (CRITICAL for quant integrity)
+  # Minimum trading days required per asset
+  min_history_days: 252  # ~1 year of trading days
+  
+  # Maximum allowed missing data ratio per asset (0.0 to 1.0)
+  # Assets exceeding this threshold are dropped
+  max_missing_ratio: 0.05  # 5% maximum missing
+  
   # Data source configuration
   source:
-    type: "placeholder"  # e.g., "yahoo", "quandl", "csv"
-    path: "${DATA_PATH:-data/raw}"
+    type: "yahoo"  # Primary source for equity prices
+    fred_api_key: "${FRED_API_KEY:-}"  # Optional FRED API key
   
-  # Universe of assets to consider
-  universe:
-    type: "placeholder"  # e.g., "sp500", "custom"
-    size: 100
-  
-  # Time period for data
-  period:
-    start: "2020-01-01"
-    end: "2024-12-31"
-  
-  # Data preprocessing settings
+  # Preprocessing settings (Phase 2)
   preprocessing:
-    normalize: true
-    fill_missing: "forward"
+    # NO forward-fill or backward-fill (quant requirement)
+    fill_missing: "none"
+    # Minimum history after alignment
     min_history_days: 252
 
 # =============================================================================
