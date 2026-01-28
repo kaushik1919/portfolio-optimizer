@@ -1,0 +1,146 @@
+# Portfolio GNN Base Experiment Configuration
+# ============================================
+# This is the foundational configuration template for all experiments.
+# All required sections are present with placeholder values.
+#
+# Environment variable substitution is supported:
+#   ${VAR}           - replaced with environment variable VAR
+#   ${VAR:-default}  - replaced with VAR or 'default' if VAR is not set
+#
+# Environment variable overrides:
+#   PGNN_SECTION_KEY=value overrides config.section.key
+#   Example: PGNN_RUNTIME_SEED=123 overrides runtime.seed
+
+# =============================================================================
+# DATA CONFIGURATION
+# =============================================================================
+# Configuration for data ingestion, preprocessing, and storage.
+# Phase 2+ will implement data loading based on these settings.
+data:
+  # Data source configuration
+  source:
+    type: "placeholder"  # e.g., "yahoo", "quandl", "csv"
+    path: "${DATA_PATH:-data/raw}"
+  
+  # Universe of assets to consider
+  universe:
+    type: "placeholder"  # e.g., "sp500", "custom"
+    size: 100
+  
+  # Time period for data
+  period:
+    start: "2020-01-01"
+    end: "2024-12-31"
+  
+  # Data preprocessing settings
+  preprocessing:
+    normalize: true
+    fill_missing: "forward"
+    min_history_days: 252
+
+# =============================================================================
+# MODEL CONFIGURATION
+# =============================================================================
+# Configuration for the Graph Neural Network architecture.
+# Phase 3+ will implement GNN models based on these settings.
+model:
+  # GNN architecture type
+  architecture:
+    type: "placeholder"  # e.g., "GAT", "GCN", "GraphSAGE"
+    num_layers: 3
+    hidden_dim: 128
+    output_dim: 64
+  
+  # Attention mechanism (for GAT-based models)
+  attention:
+    num_heads: 4
+    dropout: 0.1
+  
+  # Graph construction parameters
+  graph:
+    edge_type: "placeholder"  # e.g., "correlation", "sector", "hybrid"
+    threshold: 0.5
+    dynamic: true
+
+# =============================================================================
+# TRAINING CONFIGURATION
+# =============================================================================
+# Configuration for model training and validation.
+# Phase 3+ will implement training loops based on these settings.
+training:
+  # Optimization settings
+  optimizer:
+    type: "adam"
+    learning_rate: 0.001
+    weight_decay: 0.0001
+  
+  # Training schedule
+  schedule:
+    epochs: 100
+    batch_size: 32
+    early_stopping_patience: 10
+  
+  # Loss function configuration
+  loss:
+    type: "placeholder"  # e.g., "sharpe", "mse", "custom"
+    weights: {}
+  
+  # Validation settings
+  validation:
+    split_ratio: 0.2
+    frequency: 1  # Validate every N epochs
+
+# =============================================================================
+# OPTIMIZATION CONFIGURATION
+# =============================================================================
+# Configuration for portfolio optimization.
+# Phase 4+ will implement optimization based on these settings.
+optimization:
+  # Objective function
+  objective:
+    type: "placeholder"  # e.g., "max_sharpe", "min_variance", "risk_parity"
+    risk_free_rate: 0.02
+  
+  # Constraints
+  constraints:
+    max_weight: 0.10
+    min_weight: 0.0
+    max_turnover: 0.20
+    sector_limits: {}
+  
+  # Rebalancing configuration
+  rebalancing:
+    frequency: "monthly"
+    transaction_cost: 0.001
+
+# =============================================================================
+# RUNTIME CONFIGURATION
+# =============================================================================
+# Configuration for experiment execution environment.
+# This section is actively used in Phase 1.
+runtime:
+  # Random seed for reproducibility (REQUIRED for Phase 1)
+  seed: 42
+  
+  # Device configuration
+  device: "auto"  # "auto", "cpu", "cuda", "cuda:0"
+  
+  # Logging configuration
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    console: true
+    file: false
+    file_path: null  # Auto-generated if null and file: true
+  
+  # Experiment tracking
+  tracking:
+    enabled: false
+    backend: "placeholder"  # e.g., "mlflow", "wandb", "tensorboard"
+    project: "portfolio-gnn"
+    experiment: "base"
+  
+  # Checkpointing
+  checkpointing:
+    enabled: true
+    save_best: true
+    save_frequency: 10  # Save every N epochs
