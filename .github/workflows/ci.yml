@@ -66,15 +66,15 @@ jobs:
           python -c "from portfolio_gnn.core.paths import ProjectPaths; print('✓ paths')"
           
           echo "=== Phase 2: Data Ingestion ==="
-          python -c "from portfolio_gnn.data.loader import DataLoader; print('✓ loader')"
-          python -c "from portfolio_gnn.data.preprocessing import DataPreprocessor; print('✓ preprocessing')"
-          python -c "from portfolio_gnn.data.validation import DataValidator; print('✓ validation')"
+          python -c "from portfolio_gnn.data_ingestion.loader import load_market_data; print('✓ loader')"
+          python -c "from portfolio_gnn.data_ingestion.preprocessing import preprocess_market_data; print('✓ preprocessing')"
+          python -c "from portfolio_gnn.data_ingestion.validation import validate_timeseries; print('✓ validation')"
           
           echo "=== Phase 3: Graph Construction ==="
-          python -c "from portfolio_gnn.graph.nodes import NodeRegistry; print('✓ nodes')"
-          python -c "from portfolio_gnn.graph.edges import RollingCorrelationEdgeBuilder; print('✓ edges')"
-          python -c "from portfolio_gnn.graph.graph_builder import GraphBuilder; print('✓ graph_builder')"
-          python -c "from portfolio_gnn.graph.validation import GraphValidator; print('✓ graph validation')"
+          python -c "from portfolio_gnn.graph_construction.nodes import NodeRegistry; print('✓ nodes')"
+          python -c "from portfolio_gnn.graph_construction.edges import RollingCorrelationEdgeBuilder; print('✓ edges')"
+          python -c "from portfolio_gnn.graph_construction.graph_builder import GraphBuilder; print('✓ graph_builder')"
+          python -c "from portfolio_gnn.graph_construction.validation import validate_graph_sequence; print('✓ graph validation')"
           
           echo "=== All imports verified ==="
 
